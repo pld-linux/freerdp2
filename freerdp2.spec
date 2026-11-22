@@ -58,6 +58,8 @@ BuildRequires:	docbook-style-xsl-nons
 %{?with_faad:BuildRequires:	faad2-devel >= 2}
 # libavcodec >= 57.48.101, libavresample, libavutil
 %{?with_ffmpeg:BuildRequires:	ffmpeg-devel >= 3.1}
+# uses old channel layout API
+%{?with_ffmpeg:BuildRequires:	ffmpeg-devel < 7}
 %{?with_gstreamer:BuildRequires:	gstreamer-devel >= 1.0.5}
 %{?with_gstreamer:BuildRequires:	gstreamer-plugins-base-devel >= 1.0.5}
 # MIT krb5 >= 1.13 also possible
