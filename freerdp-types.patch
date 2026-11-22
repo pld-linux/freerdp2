@@ -1,0 +1,11 @@
+--- freerdp-2.11.8/winpr/libwinpr/utils/collections/Queue.c.orig	2026-02-24 12:16:05.000000000 +0100
++++ freerdp-2.11.8/winpr/libwinpr/utils/collections/Queue.c	2026-11-22 11:20:29.538723953 +0100
+@@ -166,7 +166,7 @@ static BOOL Queue_EnsureCapacity(wQueue*
+ 			return FALSE;
+ 
+ 		queue->capacity = new_capacity;
+-		queue->array = newArray;
++		queue->array = (void**)newArray;
+ 		ZeroMemory(&(queue->array[old_capacity]),
+ 		           (new_capacity - old_capacity) * sizeof(uintptr_t));
+ 

@@ -35,16 +35,17 @@
 Summary:	Remote Desktop Protocol client
 Summary(pl.UTF-8):	Klient protokołu RDP
 Name:		freerdp2
-Version:	2.11.7
-Release:	3
+Version:	2.11.8
+Release:	1
 License:	Apache v2.0
 Group:		Applications/Communications
 Source0:	https://pub.freerdp.com/releases/freerdp-%{version}.tar.gz
-# Source0-md5:	73ec89960f60d2649078288bdcea8aa5
+# Source0-md5:	461118e92fbab9ceb272e203db90d614
 Patch0:		freerdp-opt.patch
 Patch1:		freerdp-gsm.patch
 Patch2:		docbook-xsl.patch
-URL:		http://www.freerdp.com/
+Patch3:		freerdp-types.patch
+URL:		https://www.freerdp.com/
 %{?with_directfb:BuildRequires:	DirectFB-devel}
 %{?with_opencl:BuildRequires:	OpenCL-devel}
 %{?with_alsa:BuildRequires:	alsa-lib-devel}
@@ -71,7 +72,7 @@ BuildRequires:	openssl-devel
 %{?with_pcsc:BuildRequires:	pcsc-lite-devel}
 BuildRequires:	pkgconfig
 %{?with_pulseaudio:BuildRequires:	pulseaudio-devel}
-BuildRequires:	rpmbuild(macros) >= 1.742
+BuildRequires:	rpmbuild(macros) >= 2.047
 %{?with_soxr:BuildRequires:	soxr-devel}
 %{?with_systemd:BuildRequires:	systemd-devel >= 1:209}
 %{?with_wayland:BuildRequires:	wayland-devel}
@@ -90,7 +91,7 @@ BuildRequires:	xorg-lib-libXv-devel
 BuildRequires:	xorg-lib-libxkbfile-devel
 %endif
 BuildRequires:	zlib-devel
-Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 Requires:	hicolor-icon-theme
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -111,7 +112,7 @@ Microsoft Windows, xrdp oraz VirtualBox.
 Summary:	DirectFB based Remote Desktop Protocol klient
 Summary(pl.UTF-8):	Klient protokołu RDP oparty na DirectFB
 Group:		Applications/Communications
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}%{?_isa} = %{version}-%{release}
 Obsoletes:	freerdp-dfb < 2
 
 %description dfb
@@ -130,8 +131,8 @@ Microsoft Windows, xrdp oraz VirtualBox.
 Summary:	Wayland based Remote Desktop Protocol klient
 Summary(pl.UTF-8):	Klient protokołu RDP oparty na Wayland
 Group:		Applications/Communications
-Requires:	%{name} = %{version}-%{release}
-Requires:	%{name}-libuwac = %{version}-%{release}
+Requires:	%{name}%{?_isa} = %{version}-%{release}
+Requires:	%{name}-libuwac%{?_isa} = %{version}-%{release}
 
 %description wayland
 Wayland based Remote Desktop Protocol klient.
@@ -149,7 +150,7 @@ Microsoft Windows, xrdp oraz VirtualBox.
 Summary:	X11 based Remote Desktop Protocol klient
 Summary(pl.UTF-8):	Klient protokołu RDP oparty na X11
 Group:		Applications/Communications
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}%{?_isa} = %{version}-%{release}
 Provides:	xfreerdp = %{version}-%{release}
 Obsoletes:	freerdp < 2
 
@@ -180,7 +181,7 @@ Główne biblioteki implementujące protokół RDP.
 Summary:	Development files for FreeRDP 2 libraries
 Summary(pl.UTF-8):	Pliki programistyczne bibliotek FreeRDP 2
 Group:		Development/Libraries
-Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 
 %description devel
 This package contains the header files for developing applications
@@ -194,7 +195,7 @@ wykorzystujących biblioteki FreeRDP 2.
 Summary:	uwac: using wayland as a client
 Summary(pl.UTF-8):	Biblioteka uwac pozwalająca na korzystanie z waylanda jako klienta
 Group:		Libraries
-Requires:	%{name}-libs = %{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{version}-%{release}
 
 %description libuwac
 uwac library for using wayland as a client.
@@ -206,8 +207,8 @@ Biblioteka uwac pozwalająca na korzystanie z waylanda jako klienta.
 Summary:	Header files for uwac library
 Summary(pl.UTF-8):	Pliki nagłówkowe biblioteki uwac
 Group:		Development/Libraries
-Requires:	%{name}-libuwac = %{version}-%{release}
-Requires:	wayland-devel
+Requires:	%{name}-libuwac%{?_isa} = %{version}-%{release}
+Requires:	wayland-devel%{?_isa}
 
 %description libuwac-devel
 Header files for uwac library.
@@ -220,6 +221,7 @@ Pliki nagłówkowe biblioteki uwac.
 %patch -P0 -p1
 %patch -P1 -p1
 %patch -P2 -p1
+%patch -P3 -p1
 
 cat << EOF > xfreerdp.desktop
 [Desktop Entry]
@@ -239,32 +241,32 @@ install -d build
 cd build
 %cmake .. \
 	-DCMAKE_INSTALL_LIBDIR:PATH=%{_lib} \
-	%{cmake_on_off alsa WITH_ALSA} \
+	-DWITH_ALSA=%{__ON_OFF alsa} \
 	%{!?with_ffmpeg:-DWITH_CAIRO=ON} \
 	-DWITH_CUNIT=OFF \
-	%{cmake_on_off cups WITH_CUPS} \
+	-DWITH_CUPS=%{__ON_OFF cups} \
 	-DWITH_DEBUG_LICENSE=ON \
-	%{cmake_on_off directfb WITH_DIRECTFB} \
-	%{cmake_on_off ffmpeg WITH_DSP_FFMPEG} \
-	%{cmake_on_off faac WITH_FAAC} \
-	%{cmake_on_off faad WITH_FAAD2} \
-	%{cmake_on_off ffmpeg WITH_FFMPEG} \
-	%{cmake_on_off gsm WITH_GSM} \
-	%{cmake_on_off gstreamer WITH_GSTREAMER_1_0} \
-	%{cmake_on_off kerberos5 WITH_GSSAPI} \
+	-DWITH_DIRECTFB=%{__ON_OFF directfb} \
+	-DWITH_DSP_FFMPEG=%{__ON_OFF ffmpeg} \
+	-DWITH_FAAC=%{__ON_OFF faac} \
+	-DWITH_FAAD2=%{__ON_OFF faad} \
+	-DWITH_FFMPEG=%{__ON_OFF ffmpeg} \
+	-DWITH_GSM=%{__ON_OFF gsm} \
+	-DWITH_GSTREAMER_1_0=%{__ON_OFF gstreamer} \
+	-DWITH_GSSAPI=%{__ON_OFF kerberos5} \
 	-DWITH_JPEG=ON \
-	%{cmake_on_off systemd WITH_LIBSYSTEMD} \
-	%{cmake_on_off opencl WITH_OPENCL} \
-	%{cmake_on_off openh264 WITH_OPENH264} \
+	-DWITH_LIBSYSTEMD=%{__ON_OFF systemd} \
+	-DWITH_OPENCL=%{__ON_OFF opencl} \
+	-DWITH_OPENH264=%{__ON_OFF openh264} \
 	-DWITH_OSS=ON \
-	%{cmake_on_off pcsc WITH_PCSC} \
-	%{cmake_on_off pulseaudio WITH_PULSE} \
+	-DWITH_PCSC=%{__ON_OFF pcsc} \
+	-DWITH_PULSE=%{__ON_OFF pulseaudio} \
 	-DWITH_SERVER=ON \
-	%{cmake_on_off soxr WITH_SOXR} \
-	%{cmake_on_off sse2 WITH_SSE2} \
-	%{cmake_on_off ffmpeg WITH_SWSCALE} \
-	%{cmake_on_off wayland WITH_WAYLAND} \
-	%{cmake_on_off x11 WITH_X11} \
+	-DWITH_SOXR=%{__ON_OFF soxr} \
+	-DWITH_SSE2=%{__ON_OFF sse2} \
+	-DWITH_SWSCALE=%{__ON_OFF ffmpeg} \
+	-DWITH_WAYLAND=%{__ON_OFF wayland} \
+	-DWITH_X11=%{__ON_OFF x11} \
 	-DWITH_XCURSOR=ON \
 	-DWITH_XEXT=ON \
 	-DWITH_XINERAMA=ON \
@@ -335,30 +337,30 @@ rm -rf $RPM_BUILD_ROOT
 %files libs
 %defattr(644,root,root,755)
 %doc ChangeLog README.md
-%attr(755,root,root) %{_libdir}/libfreerdp-client%{freerdp_api}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libfreerdp-client%{freerdp_api}.so.2
-%attr(755,root,root) %{_libdir}/libfreerdp-server%{freerdp_api}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libfreerdp-server%{freerdp_api}.so.2
-%attr(755,root,root) %{_libdir}/libfreerdp-shadow%{freerdp_api}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libfreerdp-shadow%{freerdp_api}.so.2
-%attr(755,root,root) %{_libdir}/libfreerdp-shadow-subsystem%{freerdp_api}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libfreerdp-shadow-subsystem%{freerdp_api}.so.2
-%attr(755,root,root) %{_libdir}/libfreerdp%{freerdp_api}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libfreerdp%{freerdp_api}.so.2
-%attr(755,root,root) %{_libdir}/libwinpr%{freerdp_api}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libwinpr%{freerdp_api}.so.2
-%attr(755,root,root) %{_libdir}/libwinpr-tools%{freerdp_api}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libwinpr-tools%{freerdp_api}.so.2
+%{_libdir}/libfreerdp-client%{freerdp_api}.so.*.*.*
+%ghost %{_libdir}/libfreerdp-client%{freerdp_api}.so.2
+%{_libdir}/libfreerdp-server%{freerdp_api}.so.*.*.*
+%ghost %{_libdir}/libfreerdp-server%{freerdp_api}.so.2
+%{_libdir}/libfreerdp-shadow%{freerdp_api}.so.*.*.*
+%ghost %{_libdir}/libfreerdp-shadow%{freerdp_api}.so.2
+%{_libdir}/libfreerdp-shadow-subsystem%{freerdp_api}.so.*.*.*
+%ghost %{_libdir}/libfreerdp-shadow-subsystem%{freerdp_api}.so.2
+%{_libdir}/libfreerdp%{freerdp_api}.so.*.*.*
+%ghost %{_libdir}/libfreerdp%{freerdp_api}.so.2
+%{_libdir}/libwinpr%{freerdp_api}.so.*.*.*
+%ghost %{_libdir}/libwinpr%{freerdp_api}.so.2
+%{_libdir}/libwinpr-tools%{freerdp_api}.so.*.*.*
+%ghost %{_libdir}/libwinpr-tools%{freerdp_api}.so.2
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libfreerdp-client%{freerdp_api}.so
-%attr(755,root,root) %{_libdir}/libfreerdp-server%{freerdp_api}.so
-%attr(755,root,root) %{_libdir}/libfreerdp-shadow%{freerdp_api}.so
-%attr(755,root,root) %{_libdir}/libfreerdp-shadow-subsystem%{freerdp_api}.so
-%attr(755,root,root) %{_libdir}/libfreerdp%{freerdp_api}.so
-%attr(755,root,root) %{_libdir}/libwinpr%{freerdp_api}.so
-%attr(755,root,root) %{_libdir}/libwinpr-tools%{freerdp_api}.so
+%{_libdir}/libfreerdp-client%{freerdp_api}.so
+%{_libdir}/libfreerdp-server%{freerdp_api}.so
+%{_libdir}/libfreerdp-shadow%{freerdp_api}.so
+%{_libdir}/libfreerdp-shadow-subsystem%{freerdp_api}.so
+%{_libdir}/libfreerdp%{freerdp_api}.so
+%{_libdir}/libwinpr%{freerdp_api}.so
+%{_libdir}/libwinpr-tools%{freerdp_api}.so
 %{_includedir}/freerdp2
 %{_includedir}/winpr2
 %{_pkgconfigdir}/freerdp-client2.pc
@@ -375,12 +377,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files libuwac
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libuwac0.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libuwac0.so.0
+%{_libdir}/libuwac0.so.*.*.*
+%ghost %{_libdir}/libuwac0.so.0
 
 %files libuwac-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libuwac0.so
+%{_libdir}/libuwac0.so
 %{_includedir}/uwac0
 %{_pkgconfigdir}/uwac0.pc
 %{_libdir}/cmake/uwac0
